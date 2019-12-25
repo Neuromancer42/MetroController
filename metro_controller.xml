@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
+<nta>
+	<declaration>// Place global declarations here.
+
+// Number of trains
+const int N_train = 4;
+typedef int [0,N_trian-1] trian_id_t;
+
+// Number of tracks
+const int N_track = 6; // number of tracks
+typedef int [0,N_track-1] track_id_t;
+
+
+Chan doLock[N_track], doFree[N_track]; // Channels between track and center
+
+Chan doMove[N_train
+
+urgent chan go[N];</declaration>
+	<template>
+		<name x="5" y="5">Train</name>
+		<declaration>// a body of a train
+// trian_id is the parameter for each train
+// path: planned path, a list of track_id
+// step: where it reaches
+// t: clock for timing</declaration>
+		<location id="id0" x="-204" y="-170">
+			<name x="-214" y="-204">Safe</name>
+		</location>
+		<init ref="id0"/>
+	</template>
+	<template>
+		<name>Track</name>
+		<location id="id1" x="-34" y="0">
+			<name x="-85" y="-8">Free</name>
+		</location>
+		<location id="id2" x="170" y="0">
+			<name x="187" y="-8">Lock</name>
+		</location>
+		<init ref="id1"/>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id1"/>
+			<label kind="synchronisation" x="25" y="34">TrainLeave[id]?</label>
+			<nail x="136" y="34"/>
+			<nail x="0" y="34"/>
+		</transition>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id2"/>
+			<label kind="synchronisation" x="25" y="-51">TrainEnter[id]?</label>
+			<nail x="0" y="-34"/>
+			<nail x="136" y="-34"/>
+		</transition>
+	</template>
+	<template>
+		<name>Switch</name>
+		<location id="id3" x="0" y="0">
+		</location>
+		<init ref="id3"/>
+	</template>
+	<template>
+		<name>Center</name>
+		<location id="id4" x="0" y="0">
+		</location>
+		<init ref="id4"/>
+	</template>
+	<system>// Place template instantiations here.
+Process = Template();
+// List one or more processes to be composed into a system.
+system Process;
+    </system>
+	<queries>
+		<query>
+			<formula></formula>
+			<comment></comment>
+		</query>
+	</queries>
+</nta>
