@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
+<nta>
+	<declaration>// Place global declarations here.
+
+int [0,1] dir_t;
+
+// Number of tracks
+const int N_track = 3;
+typedef int [0,N_track-1] track_id_t;
+chan requireTrack[N_track], releaseTrack[N_track];
+chan reqFail[N_track], reqSucc[N_track];
+
+// Number of switches
+const int N_switch = 2;
+typedef int [0, N_switch-1] switch_id_t;
+const int N_switch_conn = 4; // (left, right) * (slow, fast) 
+typedef int [0, N_switch_conn-1] switch_conn_t;
+chan require[N_switch][N_switch_conn], release[N_switch][N_dir];
+chan reqFail[N_switch][N_switch_conn], reqSucc[N_switch][N_switch_conn];
+
+
+// Channels between train and center
+chan trainWaiting[N_train], allowTrain[N_train], trainEntering[N_train], trainLeaving[N_train];</declaration>
+	<template>
+		<name>Track</name>
+		<parameter>track_id_t id</parameter>
+		<location id="id0" x="-68" y="-34">
+			<name x="-119" y="-42">Free</name>
+		</location>
+		<location id="id1" x="0" y="34">
+			<committed/>
+		</location>
+		<location id="id2" x="-68" y="102">
+			<name x="-78" y="68">Locked</name>
+		</location>
+		<location id="id3" x="-68" y="170">
+			<committed/>
+		</location>
+		<init ref="id0"/>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id3"/>
+			<label kind="synchronisation" x="-34" y="144">requireTrack[id]?</label>
+			<nail x="-34" y="136"/>
+			<nail x="-34" y="170"/>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id0"/>
+			<label kind="synchronisation" x="-263" y="42">releaseTrack[id]?</label>
+			<nail x="-136" y="68"/>
+			<nail x="-136" y="0"/>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id2"/>
+			<label kind="synchronisation" x="-178" y="144">reqFail[id]!</label>
+			<nail x="-102" y="170"/>
+			<nail x="-102" y="136"/>
+		</transition>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id2"/>
+			<label kind="synchronisation" x="0" y="59">reqSucc[id]!</label>
+			<nail x="0" y="68"/>
+		</transition>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id1"/>
+			<label kind="synchronisation" x="0" y="0">requireTrack[id]?</label>
+			<nail x="0" y="0"/>
+		</transition>
+	</template>
+	<template>
+		<name>Switch</name>
+		<parameter>switch_id_t id</parameter>
+		<declaration>typedef struct {
+  bool succ;
+  conn_t conn;
+} req_t;
+
+req_t cur;
+bool isLeftFree, isRightFree;
+int [0,2] st = 0; // 0 for LR, 1 for MR, 2 for LM, 3 for MM (halt)
+
+void trylock(conn_t conn) {
+  cur.conn = conn;
+  if (conn == 0) {
+    if (isLeftFree) {
+      cur.succ = true;
+      if (st == 1) {
+        st = 0;
+      }
+    } else {
+      cur.succ = false;
+    }
+  } else if (conn == 1) {
+    if (isLeftFree) {
+      if (st == 2) 
+</declaration>
+		<location id="id4" x="-476" y="-1088">
+			<name x="-486" y="-1122">Idle</name>
+		</location>
+		<location id="id5" x="-476" y="-1292">
+			<name x="-486" y="-1326">TryLock</name>
+			<committed/>
+		</location>
+		<init ref="id4"/>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id5"/>
+			<label kind="select" x="-688" y="-1215">conn : switch_conn_t</label>
+			<label kind="synchronisation" x="-688" y="-1181">require[id][conn]</label>
+			<label kind="assignment" x="-688" y="-1164">trylock(conn)</label>
+			<nail x="-578" y="-1122"/>
+			<nail x="-578" y="-1258"/>
+		</transition>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id4"/>
+			<label kind="guard" x="-535" y="-1258">cur.succ</label>
+			<label kind="synchronisation" x="-535" y="-1241">reqSucc[id][cur.conn]!</label>
+		</transition>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id4"/>
+			<label kind="guard" x="-408" y="-1173">!cur.succ</label>
+			<label kind="synchronisation" x="-408" y="-1156">reqFail[id][cur.conn]!</label>
+			<nail x="-374" y="-1258"/>
+			<nail x="-374" y="-1122"/>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id4"/>
+			<label kind="synchronisation" x="-518" y="-1011">release[id][0]?</label>
+			<label kind="assignment" x="-518" y="-994">isLeftFree=true</label>
+			<nail x="-442" y="-1020"/>
+			<nail x="-510" y="-1020"/>
+		</transition>
+	</template>
+	<template>
+		<name x="5" y="5">Train</name>
+		<declaration>// a body of a train
+// trian_id is the parameter for each train
+// path: planned path, a list of track_id
+// step: where it reaches
+// t: clock for timing</declaration>
+		<location id="id6" x="-204" y="-170">
+			<name x="-214" y="-204">Safe</name>
+		</location>
+		<init ref="id6"/>
+	</template>
+	<template>
+		<name>Center</name>
+		<location id="id7" x="0" y="0">
+		</location>
+		<init ref="id7"/>
+	</template>
+	<system>// Place template instantiations here.
+Process = Template();
+// List one or more processes to be composed into a system.
+system Process;
+    </system>
+	<queries>
+		<query>
+			<formula></formula>
+			<comment></comment>
+		</query>
+	</queries>
+</nta>

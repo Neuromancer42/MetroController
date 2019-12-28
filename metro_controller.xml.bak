@@ -34,11 +34,7 @@ const int t_cycle = 1;
 const int t_stop = 1;
 const int t_pass = 1;
 const int t_fast = 4;
-const int t_slow = 16;
-const int t_delay = 1;
-
-bool overboard = false;
-bool reached[N_train] = {false, false, false, false};</declaration>
+const int t_slow = 14;</declaration>
 	<template>
 		<name>Track</name>
 		<parameter>track_id_t id</parameter>
@@ -55,15 +51,6 @@ bool reached[N_train] = {false, false, false, false};</declaration>
 			<committed/>
 		</location>
 		<init ref="id0"/>
-		<transition>
-			<source ref="id0"/>
-			<target ref="id0"/>
-			<label kind="synchronisation" x="-84" y="-119">releaseTrack[id]?</label>
-			<nail x="-34" y="-68"/>
-			<nail x="-34" y="-102"/>
-			<nail x="-102" y="-102"/>
-			<nail x="-102" y="-68"/>
-		</transition>
 		<transition>
 			<source ref="id2"/>
 			<target ref="id3"/>
@@ -445,126 +432,94 @@ bool isRightFree = true;</declaration>
 		<declaration>clock x;</declaration>
 		<location id="id19" x="-646" y="-170">
 			<name x="-656" y="-204">Start</name>
-			<label kind="invariant" x="-656" y="-153">x&lt;=t_start</label>
 		</location>
 		<location id="id20" x="-136" y="-170">
-			<name x="-153" y="-221">Enter</name>
-			<label kind="invariant" x="-170" y="-204">x&lt;=t_pass</label>
+			<name x="-146" y="-204">Enter</name>
 		</location>
 		<location id="id21" x="34" y="-170">
 			<name x="24" y="-204">Run</name>
-			<urgent/>
 		</location>
 		<location id="id22" x="-476" y="-170">
 			<name x="-510" y="-212">TryEnter</name>
-			<urgent/>
 		</location>
 		<location id="id23" x="-306" y="-170">
-			<urgent/>
 		</location>
 		<location id="id24" x="-476" y="0">
 			<name x="-552" y="-17">TryLeave</name>
-			<urgent/>
 		</location>
 		<location id="id25" x="-306" y="0">
-			<urgent/>
 		</location>
 		<location id="id26" x="-306" y="-238">
-			<label kind="invariant" x="-306" y="-263">x&lt;=t_cycle</label>
 		</location>
 		<location id="id27" x="-306" y="-68">
-			<label kind="invariant" x="-306" y="-93">x&lt;=t_cycle</label>
 		</location>
 		<location id="id28" x="-136" y="0">
-			<name x="-153" y="-51">Leave</name>
-			<label kind="invariant" x="-170" y="-34">x&lt;=t_pass</label>
+			<name x="-146" y="-34">Leave</name>
 		</location>
 		<location id="id29" x="34" y="0">
-			<name x="25" y="-51">Stop</name>
-			<label kind="invariant" x="8" y="-34">x&lt;=t_stop</label>
+			<name x="24" y="-34">Stop</name>
 		</location>
 		<location id="id30" x="204" y="0">
 			<name x="194" y="-34">End</name>
 		</location>
-		<location id="id31" x="-68" y="-136">
-			<label kind="invariant" x="-102" y="-136">x&lt;=t_fast+t_delay</label>
-		</location>
-		<location id="id32" x="34" y="-102">
-			<label kind="invariant" x="8" y="-102">x&lt;=t_slow+t_delay</label>
-		</location>
 		<init ref="id19"/>
 		<transition>
-			<source ref="id32"/>
+			<source ref="id21"/>
 			<target ref="id24"/>
-			<label kind="guard" x="-408" y="-119">x&gt;=t_slow</label>
-			<label kind="assignment" x="-408" y="-102">x=0</label>
+			<label kind="guard" x="-416" y="-119">!isFast &amp;&amp; x &gt;= t_slow</label>
+			<nail x="0" y="-102"/>
 			<nail x="-442" y="-102"/>
 		</transition>
 		<transition>
-			<source ref="id31"/>
+			<source ref="id21"/>
 			<target ref="id24"/>
-			<label kind="guard" x="-408" y="-153">x&gt;=t_fast</label>
-			<label kind="assignment" x="-408" y="-136">x=0</label>
-			<nail x="-476" y="-136"/>
-		</transition>
-		<transition>
-			<source ref="id21"/>
-			<target ref="id32"/>
-			<label kind="guard" x="42" y="-153">!isFast</label>
-		</transition>
-		<transition>
-			<source ref="id21"/>
-			<target ref="id31"/>
-			<label kind="guard" x="-42" y="-153">isFast</label>
+			<label kind="guard" x="-416" y="-153">isFast &amp;&amp; (x &gt;= t_fast)</label>
 			<nail x="0" y="-136"/>
+			<nail x="-476" y="-136"/>
 		</transition>
 		<transition>
 			<source ref="id29"/>
 			<target ref="id30"/>
-			<label kind="guard" x="93" y="-34">x == t_stop</label>
-			<label kind="synchronisation" x="93" y="-17">trainExit[id]!</label>
-			<label kind="assignment" x="93" y="0">x=0,
-reached[id]=true</label>
+			<label kind="guard" x="68" y="-34">x &gt;= t_stop</label>
+			<label kind="synchronisation" x="68" y="-17">trainExit[id]!</label>
+			<label kind="assignment" x="68" y="0">x=0</label>
 		</transition>
 		<transition>
 			<source ref="id28"/>
 			<target ref="id29"/>
-			<label kind="guard" x="-85" y="-34">x == t_pass</label>
-			<label kind="synchronisation" x="-85" y="-17">pass[id][1]!</label>
-			<label kind="assignment" x="-85" y="0">x=0</label>
+			<label kind="guard" x="-102" y="-34">x &gt;= t_pass</label>
+			<label kind="synchronisation" x="-102" y="-17">pass[id][1]!</label>
+			<label kind="assignment" x="-102" y="0">x=0</label>
 		</transition>
 		<transition>
 			<source ref="id25"/>
 			<target ref="id28"/>
-			<label kind="synchronisation" x="-288" y="-17">allow[id][1]?</label>
+			<label kind="synchronisation" x="-288" y="-17">deny[id][1]?</label>
+			<label kind="assignment" x="-288" y="0">x=0</label>
 		</transition>
 		<transition>
 			<source ref="id27"/>
 			<target ref="id24"/>
-			<label kind="guard" x="-408" y="-85">x == t_cycle</label>
-			<label kind="assignment" x="-433" y="-68">x=0,
-overboard=false</label>
+			<label kind="guard" x="-408" y="-85">x &gt;= t_cycle</label>
 			<nail x="-408" y="-68"/>
 		</transition>
 		<transition>
 			<source ref="id25"/>
 			<target ref="id27"/>
 			<label kind="synchronisation" x="-306" y="-51">deny[id][1]?</label>
-			<label kind="assignment" x="-306" y="-34">overboard=true</label>
+			<label kind="assignment" x="-306" y="-34">x=0</label>
 		</transition>
 		<transition>
 			<source ref="id26"/>
 			<target ref="id22"/>
-			<label kind="guard" x="-408" y="-255">x == t_cycle</label>
-			<label kind="assignment" x="-425" y="-238">x=0, 
-overboard=false</label>
+			<label kind="guard" x="-408" y="-255">x &gt;= t_cycle</label>
 			<nail x="-408" y="-238"/>
 		</transition>
 		<transition>
 			<source ref="id23"/>
 			<target ref="id26"/>
 			<label kind="synchronisation" x="-306" y="-221">deny[id][0]?</label>
-			<label kind="assignment" x="-306" y="-204">overboard=true</label>
+			<label kind="assignment" x="-306" y="-204">x=0</label>
 		</transition>
 		<transition>
 			<source ref="id24"/>
@@ -574,14 +529,15 @@ overboard=false</label>
 		<transition>
 			<source ref="id20"/>
 			<target ref="id21"/>
-			<label kind="guard" x="-85" y="-204">x == t_pass</label>
-			<label kind="synchronisation" x="-85" y="-187">pass[id][0]!</label>
-			<label kind="assignment" x="-85" y="-170">x=0</label>
+			<label kind="guard" x="-102" y="-204">x &gt;= t_pass</label>
+			<label kind="synchronisation" x="-102" y="-187">pass[id][0]!</label>
+			<label kind="assignment" x="-102" y="-170">x=0</label>
 		</transition>
 		<transition>
 			<source ref="id23"/>
 			<target ref="id20"/>
 			<label kind="synchronisation" x="-272" y="-187">allow[id][0]?</label>
+			<label kind="assignment" x="-272" y="-170">x=0</label>
 		</transition>
 		<transition>
 			<source ref="id22"/>
@@ -591,7 +547,7 @@ overboard=false</label>
 		<transition>
 			<source ref="id19"/>
 			<target ref="id22"/>
-			<label kind="guard" x="-612" y="-187">x == t_start</label>
+			<label kind="guard" x="-612" y="-187">x &gt;= t_start</label>
 			<label kind="assignment" x="-612" y="-170">x=0</label>
 		</transition>
 	</template>
@@ -656,123 +612,123 @@ void train_exit(train_id_t train_id) {
   exitReq.train_id = train_id;
   exitReq.track_id = track_path[train_id][N_step];
 }</declaration>
-		<location id="id33" x="0" y="0">
+		<location id="id31" x="0" y="0">
 			<name x="-10" y="-34">Idle</name>
 		</location>
-		<location id="id34" x="0" y="-136">
+		<location id="id32" x="0" y="-136">
 			<name x="-10" y="-170">EnterReq</name>
 			<committed/>
 		</location>
-		<location id="id35" x="0" y="-272">
+		<location id="id33" x="0" y="-272">
 			<committed/>
 		</location>
-		<location id="id36" x="0" y="-408">
+		<location id="id34" x="0" y="-408">
 			<committed/>
 		</location>
-		<location id="id37" x="0" y="-544">
+		<location id="id35" x="0" y="-544">
 			<committed/>
 		</location>
-		<location id="id38" x="0" y="-680">
+		<location id="id36" x="0" y="-680">
 			<committed/>
 		</location>
-		<location id="id39" x="-136" y="-272">
+		<location id="id37" x="-136" y="-272">
 			<committed/>
 		</location>
-		<location id="id40" x="-272" y="-544">
+		<location id="id38" x="-272" y="-544">
 			<committed/>
 		</location>
-		<location id="id41" x="102" y="204">
+		<location id="id39" x="102" y="204">
 			<name x="92" y="170">PassReq</name>
 			<committed/>
 		</location>
-		<location id="id42" x="204" y="0">
+		<location id="id40" x="204" y="0">
 			<committed/>
 		</location>
-		<location id="id43" x="-136" y="0">
+		<location id="id41" x="-136" y="0">
 			<name x="-146" y="-34">ExitReq</name>
 			<committed/>
 		</location>
-		<init ref="id33"/>
+		<init ref="id31"/>
 		<transition>
-			<source ref="id43"/>
-			<target ref="id33"/>
+			<source ref="id41"/>
+			<target ref="id31"/>
 			<label kind="synchronisation" x="-118" y="-17">releaseTrack[exitReq.track_id]!</label>
 		</transition>
 		<transition>
-			<source ref="id33"/>
-			<target ref="id43"/>
+			<source ref="id31"/>
+			<target ref="id41"/>
 			<label kind="select" x="-178" y="59">train_id : train_id_t</label>
 			<label kind="synchronisation" x="-178" y="93">trainExit[train_id]?</label>
 			<label kind="assignment" x="-178" y="110">train_exit(train_id)</label>
 			<nail x="-68" y="136"/>
 		</transition>
 		<transition>
-			<source ref="id42"/>
-			<target ref="id33"/>
+			<source ref="id40"/>
+			<target ref="id31"/>
 			<label kind="synchronisation" x="51" y="-17">release[passReq.switch_id][passReq.dir]!</label>
 		</transition>
 		<transition>
-			<source ref="id41"/>
-			<target ref="id42"/>
+			<source ref="id39"/>
+			<target ref="id40"/>
 			<label kind="synchronisation" x="144" y="68">releaseTrack[passReq.track_id]!</label>
 		</transition>
 		<transition>
-			<source ref="id33"/>
-			<target ref="id41"/>
+			<source ref="id31"/>
+			<target ref="id39"/>
 			<label kind="select" x="0" y="51">train_id : train_id_t,
 step : train_step_t</label>
 			<label kind="synchronisation" x="0" y="85">pass[train_id][step]?</label>
 			<label kind="assignment" x="0" y="102">train_pass(train_id, step)</label>
 		</transition>
 		<transition>
-			<source ref="id40"/>
-			<target ref="id39"/>
+			<source ref="id38"/>
+			<target ref="id37"/>
 			<label kind="synchronisation" x="-297" y="-450">releaseTrack[enterReq.track_id]!</label>
 		</transition>
 		<transition>
-			<source ref="id37"/>
-			<target ref="id40"/>
+			<source ref="id35"/>
+			<target ref="id38"/>
 			<label kind="synchronisation" x="-229" y="-569">reqFail[enterReq.switch_id][enterReq.switch_conn]?</label>
 		</transition>
 		<transition>
-			<source ref="id39"/>
-			<target ref="id33"/>
+			<source ref="id37"/>
+			<target ref="id31"/>
 			<label kind="synchronisation" x="-212" y="-229">deny[enterReq.train_id][enterReq.step]!</label>
 		</transition>
 		<transition>
-			<source ref="id35"/>
-			<target ref="id39"/>
+			<source ref="id33"/>
+			<target ref="id37"/>
 			<label kind="synchronisation" x="-119" y="-297">reqTrackFail[enterReq.track_id]?</label>
 		</transition>
 		<transition>
-			<source ref="id38"/>
-			<target ref="id33"/>
+			<source ref="id36"/>
+			<target ref="id31"/>
 			<label kind="synchronisation" x="76" y="-697">allow[enterReq.train_id][enterReq.step]!</label>
 			<nail x="340" y="-680"/>
 		</transition>
 		<transition>
-			<source ref="id37"/>
-			<target ref="id38"/>
-			<label kind="synchronisation" x="0" y="-629">reqSucc[enterReq.switch_id][enterReq.switch_conn]?</label>
-		</transition>
-		<transition>
-			<source ref="id36"/>
-			<target ref="id37"/>
-			<label kind="synchronisation" x="0" y="-493">require[enterReq.switch_id][enterReq.switch_conn]!</label>
-		</transition>
-		<transition>
 			<source ref="id35"/>
 			<target ref="id36"/>
-			<label kind="synchronisation" x="0" y="-357">reqTrackSucc[enterReq.track_id]?</label>
+			<label kind="synchronisation" x="0" y="-629">reqSucc[enterReq.switch_id][enterReq.switch_conn]?</label>
 		</transition>
 		<transition>
 			<source ref="id34"/>
 			<target ref="id35"/>
-			<label kind="synchronisation" x="0" y="-204">requireTrack[enterReq.track_id]!</label>
+			<label kind="synchronisation" x="0" y="-493">require[enterReq.switch_id][enterReq.switch_conn]!</label>
 		</transition>
 		<transition>
 			<source ref="id33"/>
 			<target ref="id34"/>
+			<label kind="synchronisation" x="0" y="-357">reqTrackSucc[enterReq.track_id]?</label>
+		</transition>
+		<transition>
+			<source ref="id32"/>
+			<target ref="id33"/>
+			<label kind="synchronisation" x="0" y="-204">requireTrack[enterReq.track_id]!</label>
+		</transition>
+		<transition>
+			<source ref="id31"/>
+			<target ref="id32"/>
 			<label kind="select" x="-51" y="-110">train_id : train_id_t,
 step : train_step_t</label>
 			<label kind="synchronisation" x="-51" y="-76">enter[train_id][step]?</label>
@@ -790,8 +746,8 @@ t6 = Track(6);
 sw0 = Switch(0);
 sw1 = Switch(1);
 
-const int t_interval = 7;
-const int t_opposite = t_interval;
+const int t_opposite = 7;
+const int t_interval = 8;
 train0 = Train(0, 1, false);
 train1 = Train(1, 1+t_opposite, false);
 train2 = Train(2, 1+t_interval, true);
@@ -799,24 +755,11 @@ train3 = Train(3, 1+t_opposite+t_interval, true);
 
 c = Center();
 
-clock clk;
 system t0, t1, t2, t3, t4, t5, t6, sw0, sw1, train0, train1, train2, train3, c;
     </system>
 	<queries>
 		<query>
-			<formula>A[] not overboard</formula>
-			<comment></comment>
-		</query>
-		<query>
-			<formula>A[] not deadlock or (reached[0] and reached[1] and reached[2] and reached[3])</formula>
-			<comment></comment>
-		</query>
-		<query>
-			<formula>A&lt;&gt; reached[3] and not reached[1]</formula>
-			<comment></comment>
-		</query>
-		<query>
-			<formula>A&lt;&gt; reached[2] and not reached[0]</formula>
+			<formula></formula>
 			<comment></comment>
 		</query>
 	</queries>
